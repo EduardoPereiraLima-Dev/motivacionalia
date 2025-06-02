@@ -10,4 +10,4 @@ class MotivationalMessageRequest(BaseModel):
     personal_care: str = Field(alias="cuidados_pessoais")
 
     class Config:
-        allow_population_by_field_name = True
+        validate_by_name = True
