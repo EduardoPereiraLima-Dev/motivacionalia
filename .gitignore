@@ -37,7 +37,7 @@ logs/
 coverage.xml
 *.cover
 .pytest_cache/
-gen-lang-client-0816853627-fdae7980c801.json
+gen-lang-client-0816853627-fdae7980c801.json/
 
 
 # Miscellaneous
