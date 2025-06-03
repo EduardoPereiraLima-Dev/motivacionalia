@@ -1,29 +1,34 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth, credentials, initialize_app
-from dotenv import load_dotenv
 import os
-
-# Carrega variáveis do .env
-load_dotenv()
+import json
 
 security = HTTPBearer(auto_error=False)
 
-# Carrega o caminho do arquivo de credenciais da variável de ambiente e inicializa o Firebase
-firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
-if not firebase_credentials_path:
-    raise RuntimeError("Variável GOOGLE_APPLICATION_CREDENTIALS não configurada")
+# Inicializa Firebase apenas uma vez
+if not len(initialize_app._apps):
+    firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+    firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-cred = credentials.Certificate(firebase_credentials_path)
-initialize_app(cred)
+    if firebase_credentials_json:
+        # Se tiver o JSON inline
+        cred_dict = json.loads(firebase_credentials_json)
+        cred = credentials.Certificate(cred_dict)
+        initialize_app(cred)
+    elif firebase_credentials_path and os.path.exists(firebase_credentials_path):
+        # Se tiver o caminho para o arquivo JSON
+        cred = credentials.Certificate(firebase_credentials_path)
+        initialize_app(cred)
+    else:
+        raise RuntimeError("Nenhuma variável de credenciais Firebase configurada: defina FIREBASE_CREDENTIALS_JSON ou GOOGLE_APPLICATION_CREDENTIALS.")
 
-# Função para validar usuário autenticado via token do Firebase
 async def get_firebase_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Bearer authentication required",
-            headers={"WWW-Authenticate": 'Bearer realm=\"auth_required\"'},
+            headers={"WWW-Authenticate": 'Bearer realm="auth_required"'},
         )
     try:
         decoded_token = auth.verify_id_token(credentials.credentials)
@@ -31,12 +36,12 @@ async def get_firebase_user(credentials: HTTPAuthorizationCredentials = Depends(
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Authentication must be via Google account",
-                headers={"WWW-Authenticate": 'Bearer error=\"invalid_token\"'},
+                headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
             )
         return decoded_token
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"Invalid authentication credentials: {str(e)}",
-            headers={"WWW-Authenticate": 'Bearer error=\"invalid_token\"'},
+            headers={"WWW-Authenticate": 'Bearer error="invalid_token"'},
         )
