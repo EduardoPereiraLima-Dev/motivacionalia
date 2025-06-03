@@ -1,13 +1,14 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from firebase_admin import auth, credentials, initialize_app
+import firebase_admin  # precisa importar isso pra checar _apps
 import os
 import json
 
 security = HTTPBearer(auto_error=False)
 
 # Inicializa Firebase apenas uma vez
-if not len(initialize_app._apps):
+if not len(firebase_admin._apps):
     firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
     firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 

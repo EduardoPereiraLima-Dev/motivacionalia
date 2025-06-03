@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: motivacionalia-api
+    env: python
+    plan: free
+    buildCommand: "pip install -r requirements.txt"
+    startCommand: "uvicorn main:app --host 0.0.0.0 --port $PORT"
+    envVars:
+      - key: PORT
+        value: "3333"
+      - key: HOST
+        value: "0.0.0.0"
+      - key: FIREBASE_CREDENTIALS_JSON
+        value: "SUA_CREDENCIAL_INLINE_AQUI"
+      # ou, se preferir subir o arquivo JSON:
+      # - key: GOOGLE_APPLICATION_CREDENTIALS
+      #   value: "seuarquivo-firebase.json"

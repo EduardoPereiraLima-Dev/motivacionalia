@@ -1,49 +1,18 @@
-# Virtual environments
+# Virtual envs
 venv/
 .env
 env/
 .venv/
 
-# Sensitive files (e.g. credentials)
+# Sensitive files
 gen-lang-client-0816853627-fdae7980c801.json
 
-# Python cache files
-__pycache__/
-*.py[cod]
-*.pyo
-*.pyd
-
-# Distribution / packaging
-build/
-dist/
-*.egg-info/
-*.egg
-pip-log.txt
-pip-delete-this-directory.txt
-
-# IDEs and editors
+# IDE configs
 .vscode/
 .idea/
-*.sublime-project
-*.sublime-workspace
 
-# System files
-.DS_Store
-Thumbs.db
+# Python cache
+__pycache__/
+*.py[cod]
 
-# Logs
-*.log
-logs/
-
-# Testing
-.coverage
-coverage.xml
-*.cover
-.pytest_cache/
-
-# Temporary files
-*.swp
-*~
-
-# Deployment or cloud config (e.g. Vercel)
-.vercel/
+gen-lang-client-0816853627-fdae7980c801.json
