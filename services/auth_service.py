@@ -1,29 +1,31 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
-from firebase_admin import auth, credentials, initialize_app
-import firebase_admin  # precisa importar isso pra checar _apps
+from firebase_admin import auth, credentials, initialize_app, get_app
 import os
 import json
 
 security = HTTPBearer(auto_error=False)
 
-# Inicializa Firebase apenas uma vez
-if not len(firebase_admin._apps):
+# Inicializa o Firebase só se ainda não estiver inicializado
+try:
+    get_app()
+except ValueError:
     firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
-    firebase_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+    google_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
     if firebase_credentials_json:
-        # Se tiver o JSON inline
         cred_dict = json.loads(firebase_credentials_json)
         cred = credentials.Certificate(cred_dict)
         initialize_app(cred)
-    elif firebase_credentials_path and os.path.exists(firebase_credentials_path):
-        # Se tiver o caminho para o arquivo JSON
-        cred = credentials.Certificate(firebase_credentials_path)
+    elif google_credentials_path:
+        cred = credentials.Certificate(google_credentials_path)
         initialize_app(cred)
     else:
-        raise RuntimeError("Nenhuma variável de credenciais Firebase configurada: defina FIREBASE_CREDENTIALS_JSON ou GOOGLE_APPLICATION_CREDENTIALS.")
+        raise RuntimeError(
+            "Nenhuma variável de credenciais do Firebase definida: configure FIREBASE_CREDENTIALS_JSON ou GOOGLE_APPLICATION_CREDENTIALS."
+        )
 
+# Função para autenticar usuário pelo token
 async def get_firebase_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
         raise HTTPException(
