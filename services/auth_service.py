@@ -6,26 +6,27 @@ import json
 
 security = HTTPBearer(auto_error=False)
 
-# Inicializa o Firebase só se ainda não estiver inicializado
-try:
-    get_app()
-except ValueError:
-    firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
-    google_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+def initialize_firebase():
+    try:
+        # Verifica se já está inicializado
+        get_app()
+    except ValueError:
+        # Não está inicializado, tenta inicializar
+        firebase_credentials_json = os.getenv("FIREBASE_CREDENTIALS_JSON")
+        google_credentials_path = os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
 
-    if firebase_credentials_json:
-        cred_dict = json.loads(firebase_credentials_json)
-        cred = credentials.Certificate(cred_dict)
-        initialize_app(cred)
-    elif google_credentials_path:
-        cred = credentials.Certificate(google_credentials_path)
-        initialize_app(cred)
-    else:
-        raise RuntimeError(
-            "Nenhuma variável de credenciais do Firebase definida: configure FIREBASE_CREDENTIALS_JSON ou GOOGLE_APPLICATION_CREDENTIALS."
-        )
+        if firebase_credentials_json:
+            cred_dict = json.loads(firebase_credentials_json)
+            cred = credentials.Certificate(cred_dict)
+            initialize_app(cred)
+        elif google_credentials_path:
+            cred = credentials.Certificate(google_credentials_path)
+            initialize_app(cred)
+        else:
+            raise RuntimeError(
+                "Nenhuma variável de credenciais do Firebase definida: configure FIREBASE_CREDENTIALS_JSON ou GOOGLE_APPLICATION_CREDENTIALS."
+            )
 
-# Função para autenticar usuário pelo token
 async def get_firebase_user(credentials: HTTPAuthorizationCredentials = Depends(security)):
     if not credentials:
         raise HTTPException(

@@ -1,15 +1,13 @@
 import uvicorn
 from fastapi import FastAPI
-from routes import router
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
 
 app = FastAPI()
-app.include_router(router)
+
+@app.get("/")
+async def root():
+    return {"message": "Hello World"}
 
 if __name__ == "__main__":
-    port = int(os.getenv("PORT", 3333))
-    host = os.getenv("HOST", "0.0.0.0")
+    host = "0.0.0.0"   # escuta em todas interfaces (útil para servidores)
+    port = 8000        # porta padrão
     uvicorn.run(app, host=host, port=port)
